@@ -12,6 +12,7 @@
     "*.{vue,js,ts}": "eslint --fix"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "lib-flexible": "^0.3.2",
     "normalize.css": "^8.0.1",
     "vant": "^3.1.0",

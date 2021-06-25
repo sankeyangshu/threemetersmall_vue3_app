@@ -12,6 +12,9 @@
     "*.{vue,js,ts}": "eslint --fix"
   },
   "dependencies": {
+    "lib-flexible": "^0.3.2",
+    "normalize.css": "^8.0.1",
+    "vant": "^3.1.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
@@ -37,6 +40,7 @@
     "eslint-plugin-vue": "^7.0.0",
     "husky": "^6.0.0",
     "lint-staged": "^11.0.0",
+    "postcss-pxtorem": "^5.1.1",
     "prettier": "^2.3.1",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",

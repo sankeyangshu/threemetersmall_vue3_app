@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:38:57
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:08:41
+ * @LastEditTime: 2021-06-30 16:48:19
 -->
 <template>
   <div class="category">
@@ -19,55 +19,30 @@
     <!-- 一级类别 开始 -->
     <div class="category__left">
       <ul class="left__total">
-        <li class="left-active">手机数码</li>
-        <li>新鲜水果</li>
-        <li>日用百货</li>
-        <li>精品服饰</li>
-        <li>酒水滋补</li>
+        <li
+          :class="{ 'left-active': currentIndex == item.id }"
+          v-for="item in categoryList"
+          :key="item.id"
+          @click="OnClickSelectMenu(item.id)"
+        >
+          {{ item.categoryName }}
+        </li>
       </ul>
     </div>
     <!-- 一级类别 结束 -->
 
     <!-- 二级类别 开始 -->
     <section class="category__right">
-      <ul class="right__total">
-        <li class="category__right__grid">
-          <van-image
-            width="120"
-            height="120"
-            fit="contain"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
-          />
-          <span>精致工艺</span>
-        </li>
-        <li class="category__right__grid">
-          <van-image
-            width="120"
-            height="120"
-            fit="contain"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
-          />
-          <span>精致工艺</span>
-        </li>
-        <li class="category__right__grid">
-          <van-image
-            width="120"
-            height="120"
-            fit="contain"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
-          />
-          <span>精致工艺</span>
-        </li>
-        <li class="category__right__grid">
-          <van-image
-            width="120"
-            height="120"
-            fit="contain"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
-          />
-          <span>精致工艺</span>
-        </li>
-      </ul>
+      <div class="right__total">
+        <div v-for="(items, index) in categoryList" :key="index">
+          <div v-if="currentIndex == items.id">
+            <div class="category__right__grid" v-for="item in items.content" :key="item.id">
+              <van-image width="120" height="120" fit="contain" :src="item.categoryImg" />
+              <span>{{ item.categoryName }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     <!-- 二级类别 结束 -->
   </div>
@@ -79,13 +54,38 @@
 
 <script lang="ts">
 import BottomTabs from "@/components/BottomTabs.vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { getCategoryListAPI } from "@/api/category";
+
+//获取分类列表和切换一级分类列表逻辑
+const useCategoryList = () => {
+  const content = reactive({
+    categoryList: [], //分类列表
+    currentIndex: 1, //选中的分类下标
+  });
+
+  //获取分类列表
+  onMounted(async () => {
+    const { data } = await getCategoryListAPI();
+    content.categoryList = data;
+  });
+
+  //切换分类列表
+  const OnClickSelectMenu = (index: number) => {
+    content.currentIndex = index;
+  };
+
+  const { categoryList, currentIndex } = toRefs(content);
+  return { categoryList, currentIndex, OnClickSelectMenu };
+};
+
 export default defineComponent({
   name: "Category",
   components: { BottomTabs },
   setup() {
     const keyword = ref(" "); //搜索关键词
-    return { keyword };
+    const { categoryList, currentIndex, OnClickSelectMenu } = useCategoryList(); // 获取分类列表
+    return { keyword, categoryList, currentIndex, OnClickSelectMenu };
   },
 });
 </script>

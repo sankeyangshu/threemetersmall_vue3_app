@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:31:02
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:32:56
+ * @LastEditTime: 2021-06-30 09:28:01
  */
 
 //导入axios
@@ -29,9 +29,9 @@ instance.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     //发请求前做的一些处理，数据转化，配置请求头，设置token,设置loading等
     // 每次发送请求之前判断vuex中是否存在token,如果存在，则统一在http请求的header都加上token，这样后台根据token判断你的登录情况
-    const token = `Bearer ${store.getters.token}`;
+    const token = store.getters.token;
     if (token) {
-      config.headers["Authorization"] = token;
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     //设置loading
     Toast.loading({

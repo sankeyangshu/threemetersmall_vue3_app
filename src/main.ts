@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 09:44:20
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 10:28:30
+ * @LastEditTime: 2021-07-01 10:19:18
  */
 import { createApp } from "vue";
 import App from "./App.vue";
@@ -42,6 +42,7 @@ import {
   Stepper,
   Toast,
   NoticeBar,
+  Popup,
 } from "vant";
 
 const app = createApp(App); //创建实例
@@ -74,7 +75,8 @@ app
   .use(CheckboxGroup)
   .use(Stepper)
   .use(Toast)
-  .use(NoticeBar);
+  .use(NoticeBar)
+  .use(Popup);
 app.use(store);
 app.use(router);
 app.mount("#app");

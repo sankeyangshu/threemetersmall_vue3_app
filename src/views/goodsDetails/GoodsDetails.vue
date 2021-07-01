@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:45:01
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:46:44
+ * @LastEditTime: 2021-07-01 10:26:05
 -->
 <template>
   <div class="goodsDetails">
@@ -42,13 +42,7 @@
     <!-- 商品名称 结束 -->
 
     <!-- 商品规格 开始 -->
-    <van-cell is-link class="produce__sku">
-      <!-- 使用 title 插槽来自定义标题 -->
-      <template #title>
-        <span class="sku__title">选择：</span>
-        <span class="sku__detail">颜色</span>
-      </template>
-    </van-cell>
+    <sku></sku>
     <!-- 商品规格 结束 -->
 
     <!-- 商品详情 开始 -->
@@ -72,6 +66,7 @@
 </template>
 
 <script lang="ts">
+import Sku from "@/components/Sku.vue";
 import { defineComponent, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 
@@ -100,6 +95,7 @@ const useSeeProductDetail = () => {
 };
 
 export default defineComponent({
+  components: { Sku },
   name: "GoodsDetails",
   setup() {
     const images = [

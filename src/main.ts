@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 09:44:20
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-01 10:19:18
+ * @LastEditTime: 2021-07-02 14:06:42
  */
 import { createApp } from "vue";
 import App from "./App.vue";
@@ -43,6 +43,7 @@ import {
   Toast,
   NoticeBar,
   Popup,
+  List,
 } from "vant";
 
 const app = createApp(App); //创建实例
@@ -76,7 +77,8 @@ app
   .use(Stepper)
   .use(Toast)
   .use(NoticeBar)
-  .use(Popup);
+  .use(Popup)
+  .use(List);
 app.use(store);
 app.use(router);
 app.mount("#app");

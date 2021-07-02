@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:38:57
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-30 16:48:19
+ * @LastEditTime: 2021-07-01 17:24:05
 -->
 <template>
   <div class="category">
@@ -36,7 +36,12 @@
       <div class="right__total">
         <div v-for="(items, index) in categoryList" :key="index">
           <div v-if="currentIndex == items.id">
-            <div class="category__right__grid" v-for="item in items.content" :key="item.id">
+            <div
+              class="category__right__grid"
+              v-for="item in items.content"
+              :key="item.id"
+              @click="OnClickGetGoods(item.id)"
+            >
               <van-image width="120" height="120" fit="contain" :src="item.categoryImg" />
               <span>{{ item.categoryName }}</span>
             </div>
@@ -56,9 +61,11 @@
 import BottomTabs from "@/components/BottomTabs.vue";
 import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { getCategoryListAPI } from "@/api/category";
+import { useRouter } from "vue-router";
 
 //获取分类列表和切换一级分类列表逻辑
 const useCategoryList = () => {
+  const router = useRouter(); //获取路由对象
   const content = reactive({
     categoryList: [], //分类列表
     currentIndex: 1, //选中的分类下标
@@ -75,8 +82,13 @@ const useCategoryList = () => {
     content.currentIndex = index;
   };
 
+  //跳转到商品列表页
+  const OnClickGetGoods = (id: number) => {
+    router.push({ path: "/goodsList", query: { id } });
+  };
+
   const { categoryList, currentIndex } = toRefs(content);
-  return { categoryList, currentIndex, OnClickSelectMenu };
+  return { categoryList, currentIndex, OnClickSelectMenu, OnClickGetGoods };
 };
 
 export default defineComponent({
@@ -84,8 +96,8 @@ export default defineComponent({
   components: { BottomTabs },
   setup() {
     const keyword = ref(" "); //搜索关键词
-    const { categoryList, currentIndex, OnClickSelectMenu } = useCategoryList(); // 获取分类列表
-    return { keyword, categoryList, currentIndex, OnClickSelectMenu };
+    const { categoryList, currentIndex, OnClickSelectMenu, OnClickGetGoods } = useCategoryList(); // 获取分类列表
+    return { keyword, categoryList, currentIndex, OnClickSelectMenu, OnClickGetGoods };
   },
 });
 </script>

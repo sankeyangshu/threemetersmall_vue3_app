@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:45:01
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-01 10:26:05
+ * @LastEditTime: 2021-07-02 13:48:09
 -->
 <template>
   <div class="goodsDetails">
@@ -20,8 +20,8 @@
 
     <!-- 轮播图 开始 -->
     <van-swipe :autoplay="3000" lazy-render class="goodsDetails__swipe">
-      <van-swipe-item v-for="image in bannerImg" :key="image">
-        <img :src="image" class="goodsDetails__img" />
+      <van-swipe-item>
+        <img :src="goodsImg" class="goodsDetails__img" />
       </van-swipe-item>
     </van-swipe>
     <!-- 轮播图 结束 -->
@@ -30,26 +30,24 @@
     <div class="product">
       <div class="product__price">
         <div class="proice__left">
-          <span class="left__newPrice">￥{{ newPrice }}</span>
-          <span class="left__oldPrice">原价{{ oldPrice }}</span>
+          <span class="left__goodsPrice">￥{{ goodsPrice }}</span>
+          <span class="left__linePrice">原价{{ linePrice }}</span>
         </div>
-        <div class="price__right">已售{{ sold }}件</div>
+        <div class="price__right">已售{{ goodsSales }}件</div>
       </div>
-      <div class="product__title">
-        {{ productTitle }}
-      </div>
+      <div class="product__title">{{ goodsName }}{{ goodsInfo }}</div>
     </div>
     <!-- 商品名称 结束 -->
 
     <!-- 商品规格 开始 -->
-    <sku></sku>
+    <sku :skuData="sku" :skuImg="goodsImg" :skuTitle="goodsName" :skuPrice="goodsPrice"></sku>
     <!-- 商品规格 结束 -->
 
     <!-- 商品详情 开始 -->
     <div class="product__details">
       <div class="details__title">商品详情</div>
-      <div class="details__img" v-for="(item, index) in detailImg" :key="index">
-        <van-image width="100%" fit="fill" :src="item" />
+      <div class="details__img">
+        <van-image width="100%" fit="fill" :src="goodsDetail" />
       </div>
     </div>
     <!-- 商品详情 结束 -->
@@ -67,8 +65,9 @@
 
 <script lang="ts">
 import Sku from "@/components/Sku.vue";
-import { defineComponent, reactive, toRefs } from "vue";
-import { useRouter } from "vue-router";
+import { defineComponent, onMounted, reactive, toRefs } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { getGoodsDetailAPI } from "@/api/goods";
 
 //返回上一级
 const useReturnLevel = () => {
@@ -81,39 +80,56 @@ const useReturnLevel = () => {
 
 //获取商品详情
 const useSeeProductDetail = () => {
-  const data = reactive({
-    productTitle: "哈哈哈", //商品名称
-    newPrice: "1111", //商品价格
-    oldPrice: "123", //商品原价
-    sold: "12", //已售出多少
-    bannerImg: ["https://img.yzcdn.cn/vant/apple-1.jpg", "https://img.yzcdn.cn/vant/apple-2.jpg"], //轮播图
-    detailImg: ["https://img.yzcdn.cn/vant/apple-1.jpg", "https://img.yzcdn.cn/vant/apple-2.jpg"], //商品详情
+  const route = useRoute();
+  const goodsid = route.query.id; //获取列表页面传递的商品id
+
+  const content = reactive({
+    goodsName: "", //商品名称
+    goodsInfo: "", //商品介绍
+    goodsPrice: "", //商品价格
+    linePrice: "", //商品原价
+    goodsSales: "", //已售出多少
+    sku: [], //商品sku
+    goodsImg: "", //轮播图
+    goodsDetail: "", //商品详情
   });
 
-  const { productTitle, newPrice, oldPrice, sold, bannerImg, detailImg } = toRefs(data);
-  return { productTitle, newPrice, oldPrice, sold, bannerImg, detailImg };
+  onMounted(async () => {
+    //获取后端传递的商品详情数据
+    await getGoodsDetailAPI({ id: Number(goodsid) }).then((res) => {
+      content.goodsName = res.data.goodsName;
+      content.goodsInfo = res.data.goodsInfo;
+      content.goodsPrice = res.data.goodsPrice;
+      content.linePrice = res.data.linePrice;
+      content.goodsSales = res.data.goodsSales;
+      content.goodsImg = res.data.goodsImg;
+      content.goodsDetail = res.data.goodsDetail;
+      content.sku = res.data.sku;
+    });
+  });
+
+  const { goodsName, goodsInfo, goodsPrice, linePrice, goodsSales, goodsImg, goodsDetail, sku } =
+    toRefs(content);
+  return { goodsName, goodsInfo, goodsPrice, linePrice, goodsSales, goodsImg, goodsDetail, sku };
 };
 
 export default defineComponent({
   components: { Sku },
   name: "GoodsDetails",
   setup() {
-    const images = [
-      "https://img.yzcdn.cn/vant/apple-1.jpg",
-      "https://img.yzcdn.cn/vant/apple-2.jpg",
-    ];
-
     const onClickLeft = useReturnLevel(); //返回上一级
-    const { productTitle, newPrice, oldPrice, sold, bannerImg, detailImg } = useSeeProductDetail();
+    const { goodsName, goodsInfo, goodsPrice, linePrice, goodsSales, goodsImg, goodsDetail, sku } =
+      useSeeProductDetail();
     return {
       onClickLeft,
-      images,
-      productTitle,
-      newPrice,
-      oldPrice,
-      sold,
-      bannerImg,
-      detailImg,
+      goodsName,
+      goodsInfo,
+      goodsPrice,
+      linePrice,
+      goodsSales,
+      goodsImg,
+      goodsDetail,
+      sku,
     };
   },
 });
@@ -153,14 +169,14 @@ export default defineComponent({
     align-items: center;
     .proice__left {
       width: 70%;
-      .left__newPrice {
+      .left__goodsPrice {
         margin-right: 20px;
         font-size: 36px;
         font-family: SourceHanSansCN;
         font-weight: 400;
         color: #d81d1d;
       }
-      .left__oldPrice {
+      .left__linePrice {
         font-size: 24px;
         color: #747474;
         text-decoration: line-through;

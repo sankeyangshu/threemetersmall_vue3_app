@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-01 10:04:40
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-01 11:30:58
+ * @LastEditTime: 2021-07-02 14:03:33
 -->
 <template>
   <!-- 商品sku单元格 开始 -->
@@ -11,7 +11,9 @@
     <!-- 使用 title 插槽来自定义标题 -->
     <template #title>
       <span class="sku__title">选择：</span>
-      <span class="sku__detail">颜色</span>
+      <span class="sku__detail" v-for="(item, index) in skuData" :key="index">
+        {{ item.skuTitle }}
+      </span>
     </template>
   </van-cell>
   <!-- 商品sku单元格 结束 -->
@@ -21,28 +23,28 @@
     <div class="sku">
       <div class="sku__total">
         <div class="sku__total__img">
-          <van-image width="100%" height="100%" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+          <van-image width="100%" height="100%" :src="skuImg" />
         </div>
         <div class="sku__total__detail">
           <div class="detail__content">
-            华为手机华为手机华为手机华为手机华为手机华为手机华为手机华为手机华为手机华为手机华为手机华为手机
+            {{ skuTitle }}
           </div>
-          <div class="detail__price">￥100.00</div>
+          <div class="detail__price">￥{{ skuPrice }}</div>
           <div class="detail__sku">请选择<span>尺码</span></div>
         </div>
       </div>
-      <div class="sku__list">
-        <div class="sku__list__title">颜色</div>
+      <div class="sku__list" v-for="(items, index) in skuData" :key="index">
+        <div class="sku__list__title">{{ items.skuTitle }}</div>
         <div class="sku__list__spec">
-          <div class="spec__item">
-            <span>蓝色</span>
+          <div class="spec__item" v-for="(item, index) in items.skuList" :key="index">
+            <span>{{ item }}</span>
           </div>
-          <div class="spec__item spec__item-active">
+          <!-- <div class="spec__item spec__item-active">
             <span>红色</span>
           </div>
           <div class="spec__item spec__item-disabled">
             <span>灰色</span>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="sku__num">
@@ -58,17 +60,47 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-// 引入模拟数据
-// import { specList, skuList } from "./data";
+import { defineComponent, PropType, ref } from "vue";
+
+//商品sku数据类型
+interface skuPropsType {
+  skuTitle: string;
+  skuList: string[];
+}
+
+//商品sku弹出层显示和隐藏
+const useShowSkuProp = () => {
+  const isShowSku = ref(false); //控制商品sku弹出层的显示和隐藏
+  const OnClickShowSku = () => {
+    isShowSku.value = true;
+  }; //显示商品sku弹出层
+  return { isShowSku, OnClickShowSku };
+};
+
 export default defineComponent({
   name: "Sku",
+  props: {
+    skuData: {
+      //商品sku数据
+      required: true,
+      type: Array as PropType<skuPropsType[]>,
+    },
+    skuImg: {
+      //商品缩略图
+      type: String,
+    },
+    skuTitle: {
+      //商品名称
+      type: String,
+    },
+    skuPrice: {
+      //商品价格
+      type: String,
+    },
+  },
   setup() {
     const purchaseNum = ref(1); //步进器由增加按钮、减少按钮和输入框组成，用于在一定范围内输入、调整数字。
-    const isShowSku = ref(false); //控制商品sku弹出层的显示和隐藏
-    const OnClickShowSku = () => {
-      isShowSku.value = true;
-    }; //显示商品sku弹出层
+    const { isShowSku, OnClickShowSku } = useShowSkuProp(); //商品sku弹出层显示和隐藏
     return { isShowSku, OnClickShowSku, purchaseNum };
   },
 });
@@ -85,6 +117,7 @@ export default defineComponent({
     vertical-align: middle;
   }
   .sku__detail {
+    margin-right: 10px;
     font-size: 28px;
     color: #333;
     vertical-align: middle;

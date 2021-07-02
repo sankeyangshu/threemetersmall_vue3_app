@@ -3,7 +3,8 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:36:30
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:36:44
+ * @LastEditTime: 2021-07-02 14:53:28
  */
 
 export * from "./params";
+export * from "./response";

@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:45:01
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-02 13:48:09
+ * @LastEditTime: 2021-07-12 16:35:48
 -->
 <template>
   <div class="goodsDetails">
@@ -40,7 +40,16 @@
     <!-- 商品名称 结束 -->
 
     <!-- 商品规格 开始 -->
-    <sku :skuData="sku" :skuImg="goodsImg" :skuTitle="goodsName" :skuPrice="goodsPrice"></sku>
+    <div v-if="goodsName">
+      <sku
+        :specList="specList"
+        :skuList="skuList"
+        :skuImg="goodsImg"
+        :skuTitle="goodsName"
+        :skuPrice="goodsPrice"
+        :goodsId="id"
+      ></sku>
+    </div>
     <!-- 商品规格 结束 -->
 
     <!-- 商品详情 开始 -->
@@ -84,12 +93,14 @@ const useSeeProductDetail = () => {
   const goodsid = route.query.id; //获取列表页面传递的商品id
 
   const content = reactive({
+    id: 0, //商品id
     goodsName: "", //商品名称
     goodsInfo: "", //商品介绍
     goodsPrice: "", //商品价格
     linePrice: "", //商品原价
     goodsSales: "", //已售出多少
-    sku: [], //商品sku
+    specList: [], //商品规格数组
+    skuList: [], //商品sku数组
     goodsImg: "", //轮播图
     goodsDetail: "", //商品详情
   });
@@ -97,6 +108,7 @@ const useSeeProductDetail = () => {
   onMounted(async () => {
     //获取后端传递的商品详情数据
     await getGoodsDetailAPI({ id: Number(goodsid) }).then((res) => {
+      content.id = res.data.id;
       content.goodsName = res.data.goodsName;
       content.goodsInfo = res.data.goodsInfo;
       content.goodsPrice = res.data.goodsPrice;
@@ -104,13 +116,35 @@ const useSeeProductDetail = () => {
       content.goodsSales = res.data.goodsSales;
       content.goodsImg = res.data.goodsImg;
       content.goodsDetail = res.data.goodsDetail;
-      content.sku = res.data.sku;
+      content.specList = res.data.specList;
+      content.skuList = res.data.skuList;
     });
   });
 
-  const { goodsName, goodsInfo, goodsPrice, linePrice, goodsSales, goodsImg, goodsDetail, sku } =
-    toRefs(content);
-  return { goodsName, goodsInfo, goodsPrice, linePrice, goodsSales, goodsImg, goodsDetail, sku };
+  const {
+    id,
+    goodsName,
+    goodsInfo,
+    goodsPrice,
+    linePrice,
+    goodsSales,
+    goodsImg,
+    goodsDetail,
+    specList,
+    skuList,
+  } = toRefs(content);
+  return {
+    id,
+    goodsName,
+    goodsInfo,
+    goodsPrice,
+    linePrice,
+    goodsSales,
+    goodsImg,
+    goodsDetail,
+    specList,
+    skuList,
+  };
 };
 
 export default defineComponent({
@@ -118,10 +152,8 @@ export default defineComponent({
   name: "GoodsDetails",
   setup() {
     const onClickLeft = useReturnLevel(); //返回上一级
-    const { goodsName, goodsInfo, goodsPrice, linePrice, goodsSales, goodsImg, goodsDetail, sku } =
-      useSeeProductDetail();
-    return {
-      onClickLeft,
+    const {
+      id,
       goodsName,
       goodsInfo,
       goodsPrice,
@@ -129,7 +161,21 @@ export default defineComponent({
       goodsSales,
       goodsImg,
       goodsDetail,
-      sku,
+      specList,
+      skuList,
+    } = useSeeProductDetail();
+    return {
+      onClickLeft,
+      id,
+      goodsName,
+      goodsInfo,
+      goodsPrice,
+      linePrice,
+      goodsSales,
+      goodsImg,
+      goodsDetail,
+      specList,
+      skuList,
     };
   },
 });

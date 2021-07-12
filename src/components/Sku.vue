@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-01 10:04:40
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-02 14:03:33
+ * @LastEditTime: 2021-07-12 17:25:08
 -->
 <template>
   <!-- 商品sku单元格 开始 -->
@@ -11,7 +11,7 @@
     <!-- 使用 title 插槽来自定义标题 -->
     <template #title>
       <span class="sku__title">选择：</span>
-      <span class="sku__detail" v-for="(item, index) in skuData" :key="index">
+      <span class="sku__detail" v-for="(item, index) in specList" :key="index">
         {{ item.skuTitle }}
       </span>
     </template>
@@ -30,14 +30,24 @@
             {{ skuTitle }}
           </div>
           <div class="detail__price">￥{{ skuPrice }}</div>
-          <div class="detail__sku">请选择<span>尺码</span></div>
+          <div class="detail__sku">
+            请选择<span v-for="item in selectSpec" :key="item">{{ item }}</span>
+          </div>
         </div>
       </div>
-      <div class="sku__list" v-for="(items, index) in skuData" :key="index">
-        <div class="sku__list__title">{{ items.skuTitle }}</div>
+      <div class="sku__list" v-for="(items, index) in specArray" :key="index">
+        <div class="sku__list__title">{{ items.title }}</div>
         <div class="sku__list__spec">
-          <div class="spec__item" v-for="(item, index) in items.skuList" :key="index">
-            <span>{{ item }}</span>
+          <div
+            class="spec__item"
+            v-for="(item, index) in items.list"
+            :key="index"
+            :class="[
+              selectSpec[items.title] === item.name ? 'spec__item-active' : '',
+              item.able ? '' : 'spec__item-disabled',
+            ]"
+          >
+            <span @click="changeSpec(items.title, item.name, item.able)">{{ item.name }}</span>
           </div>
           <!-- <div class="spec__item spec__item-active">
             <span>红色</span>
@@ -60,13 +70,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, reactive, ref, toRefs } from "vue";
+import { specPropsType, skuListType, selectArrayType, specArrayType, selectI } from "@/types";
 
-//商品sku数据类型
-interface skuPropsType {
-  skuTitle: string;
-  skuList: string[];
-}
+//商品规格数据类型
+export type specProps = specPropsType[];
+//商品sku列表数据类型
+export type skuListProps = skuListType[];
 
 //商品sku弹出层显示和隐藏
 const useShowSkuProp = () => {
@@ -77,13 +87,106 @@ const useShowSkuProp = () => {
   return { isShowSku, OnClickShowSku };
 };
 
+//商品sku规格选择逻辑
+const useChoiceSku = (skuList: skuListProps, specList: specProps) => {
+  const content = reactive<selectArrayType<specArrayType, skuListType, selectI>>({
+    specArray: [], //规格数组
+    skuArray: [], //sku数组
+    selectSpec: {}, // 选择数据的对象
+  });
+  //处理数据
+  content.skuArray = skuList;
+
+  //初始化选择数据的对象
+  specList.forEach((item) => {
+    content.selectSpec = {
+      [item.skuTitle]: "",
+    };
+  });
+
+  //判断规格是否可以被选中
+  const isAble = (key: string, value: string) => {
+    // 深拷贝 避免被影响
+    let copySelectSpec = JSON.parse(JSON.stringify(content.selectSpec));
+    //赋值当前验证项
+    copySelectSpec[key] = value;
+    //判断是否存在符合条件的项
+    let flag = content.skuArray.some((item) => {
+      let i = 0;
+      for (let k in copySelectSpec) {
+        if (copySelectSpec[k] != "" && item.spec.includes(copySelectSpec[k])) {
+          // console.log(item)
+          i++;
+        } else if (copySelectSpec[k] == "") {
+          i++;
+        }
+      }
+      // 符合下面条件就退出了 不符合会一直循环知道循环结束没有符合的条件就 return false 了
+      // console.log(i)
+      return i == specList.length;
+    });
+    // console.log(flag);
+    return flag;
+  };
+
+  //将规格数据处理成我们视图所需要的数据格式
+  content.specArray = specList.map((res) => {
+    return {
+      title: res.skuTitle,
+      list: res.specList.map((its) => {
+        return {
+          name: its,
+          able: isAble(res.skuTitle, its), //判断该规格是否可以选择
+        };
+      }),
+    };
+  });
+
+  // 点击事件
+  const changeSpec = (key: string, value: string, able: boolean) => {
+    //不能被选中，直接返回
+    if (!able) return;
+    //可以被选中
+    if (content.selectSpec[key] === value) {
+      content.selectSpec[key] = "";
+    } else {
+      content.selectSpec[key] = value;
+    }
+    // forEach循环改变原数组
+    content.specArray.forEach((item) => {
+      item.list.forEach((its) => {
+        its.able = isAble(item.title, its.name);
+        // console.log(its.name, its.able);
+      });
+    });
+  };
+
+  const { specArray, skuArray, selectSpec } = toRefs(content);
+  return {
+    specArray,
+    skuArray,
+    selectSpec,
+    changeSpec,
+  };
+};
+
 export default defineComponent({
   name: "Sku",
   props: {
-    skuData: {
+    specList: {
+      //商品规格数据
+      required: true,
+      type: Array as PropType<specProps>,
+    },
+    skuList: {
       //商品sku数据
       required: true,
-      type: Array as PropType<skuPropsType[]>,
+      type: Array as PropType<skuListProps>,
+    },
+    goodsId: {
+      //商品id
+      required: true,
+      type: Number,
     },
     skuImg: {
       //商品缩略图
@@ -98,10 +201,14 @@ export default defineComponent({
       type: String,
     },
   },
-  setup() {
+  setup(props) {
     const purchaseNum = ref(1); //步进器由增加按钮、减少按钮和输入框组成，用于在一定范围内输入、调整数字。
     const { isShowSku, OnClickShowSku } = useShowSkuProp(); //商品sku弹出层显示和隐藏
-    return { isShowSku, OnClickShowSku, purchaseNum };
+    const { specArray, skuArray, selectSpec, changeSpec } = useChoiceSku(
+      props.skuList,
+      props.specList
+    );
+    return { isShowSku, OnClickShowSku, purchaseNum, specArray, skuArray, selectSpec, changeSpec };
   },
 });
 </script>

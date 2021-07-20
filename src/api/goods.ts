@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-01 17:28:25
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-19 15:38:14
+ * @LastEditTime: 2021-07-20 09:15:10
  */
 
 //导入http
@@ -11,7 +11,7 @@ import http from "../utils/http";
 
 //商品列表页请求参数数据类型
 interface goodsListParams {
-  categoryId: number;
+  categoryId?: number;
   pageIndex: number;
   pageSize: number;
 }

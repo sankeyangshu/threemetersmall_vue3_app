@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:40:03
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-20 09:06:33
+ * @LastEditTime: 2021-07-20 09:36:42
 -->
 <template>
   <div class="flow">
@@ -60,7 +60,7 @@
     <van-divider :style="{ color: '#999999', borderColor: '#999999', padding: '0 16px' }">
       <van-icon name="fire" color="#ee0a24" />为你推荐
     </van-divider>
-    <good-list></good-list>
+    <good-list :goodsList="goodsList"></good-list>
     <!-- 为你推荐 结束 -->
 
     <!-- 分割线 开始 -->
@@ -77,7 +77,7 @@
     <!-- 分割线 结束 -->
 
     <!-- 提交订单栏 开始 -->
-    <van-submit-bar :price="3050" button-text="提交订单" @submit="onSubmit">
+    <van-submit-bar :price="3050" button-text="提交订单">
       <van-checkbox v-model="checked" checked-color="#ee0a24"> 全选 </van-checkbox>
     </van-submit-bar>
     <!-- 提交订单栏 结束 -->
@@ -93,7 +93,7 @@ import BottomTabs from "@/components/BottomTabs.vue";
 import GoodList from "@/components/GoodList.vue";
 import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { getShoppingAPI, patchUpdateShopAPI, deleteShoppingAPI } from "@/api/shoppingcart";
-import { getGoodsListAPI, getGoodsDetailAPI } from "@/api/goods";
+import { getGoodsListAPI } from "@/api/goods";
 import { useRouter } from "vue-router";
 
 //购物车逻辑
@@ -171,6 +171,26 @@ const useShoppingCart = () => {
   };
 };
 
+//获取为你推荐商品列表
+const useGoodsList = () => {
+  const content = reactive({
+    goodsList: [], //商品列表数据
+  });
+  const data = { pageIndex: 0, pageSize: 10 }; //请求参数
+  onMounted(async () => {
+    await getGoodsListAPI(data).then((res) => {
+      if (res.data.goodsList.length != 0) {
+        content.goodsList = res.data.goodsList;
+      }
+    });
+  });
+
+  const { goodsList } = toRefs(content);
+  return {
+    goodsList,
+  };
+};
+
 export default defineComponent({
   name: "Flow",
   components: { BottomTabs, GoodList },
@@ -179,7 +199,9 @@ export default defineComponent({
     const value = ref(1); //当前输入的值
     const { flowList, OnPlusGoodsNum, OnMinusGoodsNum, OnClickViewDetail, OnClickDeleteCart } =
       useShoppingCart(); //购物车逻辑
+    const { goodsList } = useGoodsList(); //获取为你推荐商品列表
     return {
+      goodsList,
       checked,
       value,
       flowList,

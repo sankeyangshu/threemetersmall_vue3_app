@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:24:22
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:06:34
+ * @LastEditTime: 2021-07-20 09:17:58
 -->
 <template>
   <div class="wrapper">
@@ -61,7 +61,7 @@
     <van-divider :style="{ color: '#999999', borderColor: '#999999', padding: '0 16px' }">
       <van-icon name="fire" color="#ee0a24" />猜你喜欢
     </van-divider>
-    <good-list></good-list>
+    <good-list :goodsList="goodsList"></good-list>
     <!-- 猜你喜欢 结束 -->
 
     <!-- 分割线 开始 -->
@@ -79,7 +79,29 @@
 <script lang="ts">
 import BottomTabs from "@/components/BottomTabs.vue";
 import GoodList from "@/components/GoodList.vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { getGoodsListAPI } from "@/api/goods";
+
+//获取商品列表数据
+const useGoodsList = () => {
+  const content = reactive({
+    goodsList: [], //商品列表数据
+  });
+  const data = { pageIndex: 0, pageSize: 10 }; //请求参数
+  onMounted(async () => {
+    await getGoodsListAPI(data).then((res) => {
+      if (res.data.goodsList.length != 0) {
+        content.goodsList = res.data.goodsList;
+      }
+    });
+  });
+
+  const { goodsList } = toRefs(content);
+  return {
+    goodsList,
+  };
+};
+
 export default defineComponent({
   name: "Home",
   components: { BottomTabs, GoodList },
@@ -90,7 +112,9 @@ export default defineComponent({
       "https://img.yzcdn.cn/vant/apple-2.jpg",
     ]; //轮播图
 
-    return { keyword, images };
+    const { goodsList } = useGoodsList(); //获取商品列表
+
+    return { keyword, images, goodsList };
   },
 });
 </script>

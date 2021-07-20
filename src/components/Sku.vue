@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-01 10:04:40
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-19 14:05:04
+ * @LastEditTime: 2021-07-20 09:49:04
 -->
 <template>
   <!-- 商品sku单元格 开始 -->
@@ -66,7 +66,7 @@
       </div>
       <div class="sku__num">
         <div class="num__title">购买数量</div>
-        <van-stepper v-model="purchaseNum" />
+        <van-stepper v-model="purchaseNum" max="99" disable-input />
       </div>
       <div class="sku__btn">
         <van-button type="primary" size="large" color="#3fbb47" @click="OnClickSubmit(selectSpec)">

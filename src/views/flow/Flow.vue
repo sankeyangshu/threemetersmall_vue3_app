@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:40:03
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-20 09:36:42
+ * @LastEditTime: 2021-07-20 11:11:09
 -->
 <template>
   <div class="flow">
@@ -16,12 +16,12 @@
     <!-- 订单 开始 -->
     <div v-else>
       <van-swipe-cell v-for="item in flowList" :key="item.id">
-        <div class="flow__list" @click="OnClickViewDetail(item.goodsId)">
+        <div class="flow__list">
           <div class="list__details">
             <div class="details__check">
-              <van-checkbox v-model="checked" checked-color="#ee0a24"></van-checkbox>
+              <van-checkbox v-model="item.checked" checked-color="#ee0a24"></van-checkbox>
             </div>
-            <div class="details__img">
+            <div class="details__img" @click="OnClickViewDetail(item.goodsId)">
               <van-image fit="fill" width="140" height="140" :src="item.goodsImg" />
             </div>
             <div class="details__detail">
@@ -35,6 +35,7 @@
                 <div class="price">￥{{ item.goodsPrice }}</div>
                 <van-stepper
                   v-model="item.goodsNumber"
+                  max="99"
                   disable-input
                   @plus="OnPlusGoodsNum(item.id, item.goodsNumber)"
                   @minus="OnMinusGoodsNum(item.id, item.goodsNumber)"
@@ -77,7 +78,7 @@
     <!-- 分割线 结束 -->
 
     <!-- 提交订单栏 开始 -->
-    <van-submit-bar :price="3050" button-text="提交订单">
+    <van-submit-bar :price="totalPrice" button-text="提交订单">
       <van-checkbox v-model="checked" checked-color="#ee0a24"> 全选 </van-checkbox>
     </van-submit-bar>
     <!-- 提交订单栏 结束 -->
@@ -91,7 +92,7 @@
 <script lang="ts">
 import BottomTabs from "@/components/BottomTabs.vue";
 import GoodList from "@/components/GoodList.vue";
-import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { getShoppingAPI, patchUpdateShopAPI, deleteShoppingAPI } from "@/api/shoppingcart";
 import { getGoodsListAPI } from "@/api/goods";
 import { useRouter } from "vue-router";
@@ -102,6 +103,8 @@ const useShoppingCart = () => {
   const content = reactive({
     flowList: [], //购物车列表
   });
+
+  //生命周期函数
   onMounted(async () => {
     //获取购物车列表数据
     getShoppingList();
@@ -127,6 +130,7 @@ const useShoppingCart = () => {
       content.flowList = data.shoppingList.map((res: any) => {
         res.spec = JSON.parse(res.spec);
         res.goodsPrice = res.goodsPrice * res.goodsNumber;
+        res.checked = true;
         return res;
       });
     }
@@ -161,9 +165,25 @@ const useShoppingCart = () => {
     });
   };
 
+  //计算购物车商品总金额
+  const totalPrice = computed(() => {
+    const list = JSON.parse(JSON.stringify(content.flowList)).filter((val: any) => {
+      return (val.checked = true);
+    });
+    let count = 0;
+    if (list) {
+      for (let i = 0; i < list.length; i++) {
+        const element = list[i];
+        count += element.goodsPrice;
+      }
+    }
+    return Number((count * 100).toFixed(2));
+  });
+
   const { flowList } = toRefs(content);
   return {
     flowList,
+    totalPrice,
     OnPlusGoodsNum,
     OnMinusGoodsNum,
     OnClickViewDetail,
@@ -196,14 +216,19 @@ export default defineComponent({
   components: { BottomTabs, GoodList },
   setup() {
     const checked = ref(true);
-    const value = ref(1); //当前输入的值
-    const { flowList, OnPlusGoodsNum, OnMinusGoodsNum, OnClickViewDetail, OnClickDeleteCart } =
-      useShoppingCart(); //购物车逻辑
+    const {
+      flowList,
+      totalPrice,
+      OnPlusGoodsNum,
+      OnMinusGoodsNum,
+      OnClickViewDetail,
+      OnClickDeleteCart,
+    } = useShoppingCart(); //购物车逻辑
     const { goodsList } = useGoodsList(); //获取为你推荐商品列表
     return {
       goodsList,
+      totalPrice,
       checked,
-      value,
       flowList,
       OnPlusGoodsNum,
       OnMinusGoodsNum,

@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:40:03
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-20 11:11:09
+ * @LastEditTime: 2021-07-20 13:59:50
 -->
 <template>
   <div class="flow">
@@ -19,7 +19,7 @@
         <div class="flow__list">
           <div class="list__details">
             <div class="details__check">
-              <van-checkbox v-model="item.checked" checked-color="#ee0a24"></van-checkbox>
+              <van-checkbox v-model="item.isChecked" checked-color="#ee0a24"></van-checkbox>
             </div>
             <div class="details__img" @click="OnClickViewDetail(item.goodsId)">
               <van-image fit="fill" width="140" height="140" :src="item.goodsImg" />
@@ -79,7 +79,7 @@
 
     <!-- 提交订单栏 开始 -->
     <van-submit-bar :price="totalPrice" button-text="提交订单">
-      <van-checkbox v-model="checked" checked-color="#ee0a24"> 全选 </van-checkbox>
+      <van-checkbox v-model="allChecked" checked-color="#ee0a24"> 全选 </van-checkbox>
     </van-submit-bar>
     <!-- 提交订单栏 结束 -->
   </div>
@@ -130,7 +130,6 @@ const useShoppingCart = () => {
       content.flowList = data.shoppingList.map((res: any) => {
         res.spec = JSON.parse(res.spec);
         res.goodsPrice = res.goodsPrice * res.goodsNumber;
-        res.checked = true;
         return res;
       });
     }
@@ -167,27 +166,49 @@ const useShoppingCart = () => {
 
   //计算购物车商品总金额
   const totalPrice = computed(() => {
-    const list = JSON.parse(JSON.stringify(content.flowList)).filter((val: any) => {
-      return (val.checked = true);
-    });
+    const list = JSON.parse(JSON.stringify(content.flowList));
     let count = 0;
     if (list) {
       for (let i = 0; i < list.length; i++) {
         const element = list[i];
-        count += element.goodsPrice;
+        if (element.isChecked) {
+          count += element.goodsPrice;
+        }
       }
     }
     return Number((count * 100).toFixed(2));
   });
 
+  //计算购物车是否全选
+  const allChecked = computed(() => {
+    const list = JSON.parse(JSON.stringify(content.flowList));
+    let result = true;
+    if (list) {
+      for (let i = 0; i < list.length; i++) {
+        const element = list[i];
+        if (!element.isChecked) {
+          result = false;
+        }
+      }
+    }
+    return result;
+  });
+
+  //全选功能
+  const OnChangeAllCheck = () => {
+    console.log("checked");
+  };
+
   const { flowList } = toRefs(content);
   return {
     flowList,
     totalPrice,
+    allChecked,
     OnPlusGoodsNum,
     OnMinusGoodsNum,
     OnClickViewDetail,
     OnClickDeleteCart,
+    OnChangeAllCheck,
   };
 };
 
@@ -215,25 +236,27 @@ export default defineComponent({
   name: "Flow",
   components: { BottomTabs, GoodList },
   setup() {
-    const checked = ref(true);
     const {
       flowList,
       totalPrice,
+      allChecked,
       OnPlusGoodsNum,
       OnMinusGoodsNum,
       OnClickViewDetail,
       OnClickDeleteCart,
+      OnChangeAllCheck,
     } = useShoppingCart(); //购物车逻辑
     const { goodsList } = useGoodsList(); //获取为你推荐商品列表
     return {
       goodsList,
       totalPrice,
-      checked,
+      allChecked,
       flowList,
       OnPlusGoodsNum,
       OnMinusGoodsNum,
       OnClickViewDetail,
       OnClickDeleteCart,
+      OnChangeAllCheck,
     };
   },
 });

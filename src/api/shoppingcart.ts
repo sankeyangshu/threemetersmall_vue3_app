@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-19 14:07:57
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-19 16:27:01
+ * @LastEditTime: 2021-07-20 13:13:50
  */
 
 //导入http
@@ -23,13 +23,15 @@ interface addShoppingType {
   goodsNumber: number; //商品数量
   goodsPrice: number; //商品价格
   spec: string; //商品规格
+  isChecked: boolean; //是否选中该商品
   isDelete?: number; //是否删除了该商品
 }
 
 //更新购物车商品
 interface updateShopType {
   id: number; //购物车id
-  goodsNumber: number; //商品数量
+  goodsNumber?: number; //商品数量
+  isChecked?: boolean; //是否选中该商品
 }
 
 //删除购物车商品

@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:45:01
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-19 16:29:07
+ * @LastEditTime: 2021-07-20 13:15:02
 -->
 <template>
   <div class="goodsDetails">
@@ -176,6 +176,7 @@ const useGoodsCartBuy = () => {
     goodsNumber: 0, //商品数量
     goodsPrice: 0, //商品价格
     spec: "", //商品规格
+    isChecked: true, //是否选中了该商品
     isDelete: 0, //是否删除了该商品
   };
 

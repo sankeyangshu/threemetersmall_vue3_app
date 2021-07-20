@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:33:08
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:33:26
+ * @LastEditTime: 2021-07-19 16:46:41
  */
 
 //1.导入封装好的axios实例
@@ -50,11 +50,11 @@ const http = {
    */
   patch(url: string, params: any) {
     const config: any = {
-      method: "put",
+      method: "patch",
       url: url,
     };
     if (params) {
-      config.params = params;
+      config.data = params;
     }
     return request(config);
   },

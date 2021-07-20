@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-01 10:04:40
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-12 17:25:08
+ * @LastEditTime: 2021-07-19 14:05:04
 -->
 <template>
   <!-- 商品sku单元格 开始 -->
@@ -11,9 +11,16 @@
     <!-- 使用 title 插槽来自定义标题 -->
     <template #title>
       <span class="sku__title">选择：</span>
-      <span class="sku__detail" v-for="(item, index) in specList" :key="index">
-        {{ item.skuTitle }}
-      </span>
+      <template v-if="!isShowSpec">
+        <span class="sku__detail" v-for="(item, index) in specList" :key="index">
+          {{ item.skuTitle }}
+        </span>
+      </template>
+      <template v-else>
+        <span class="sku__detail" v-for="item in selectSpec" :key="item">
+          {{ item }}
+        </span>
+      </template>
     </template>
   </van-cell>
   <!-- 商品sku单元格 结束 -->
@@ -62,7 +69,9 @@
         <van-stepper v-model="purchaseNum" />
       </div>
       <div class="sku__btn">
-        <van-button type="primary" size="large" color="#3fbb47">加入购物车</van-button>
+        <van-button type="primary" size="large" color="#3fbb47" @click="OnClickSubmit(selectSpec)">
+          确定
+        </van-button>
       </div>
     </div>
   </van-popup>
@@ -70,22 +79,21 @@
 </template>
 
 <script lang="ts">
+import { Toast } from "vant";
 import { defineComponent, PropType, reactive, ref, toRefs } from "vue";
-import { specPropsType, skuListType, selectArrayType, specArrayType, selectI } from "@/types";
+import {
+  specPropsType,
+  skuListType,
+  selectArrayType,
+  specArrayType,
+  selectI,
+  selectSpecType,
+} from "@/types";
 
 //商品规格数据类型
 export type specProps = specPropsType[];
 //商品sku列表数据类型
 export type skuListProps = skuListType[];
-
-//商品sku弹出层显示和隐藏
-const useShowSkuProp = () => {
-  const isShowSku = ref(false); //控制商品sku弹出层的显示和隐藏
-  const OnClickShowSku = () => {
-    isShowSku.value = true;
-  }; //显示商品sku弹出层
-  return { isShowSku, OnClickShowSku };
-};
 
 //商品sku规格选择逻辑
 const useChoiceSku = (skuList: skuListProps, specList: specProps) => {
@@ -142,7 +150,7 @@ const useChoiceSku = (skuList: skuListProps, specList: specProps) => {
     };
   });
 
-  // 点击事件
+  // 规格点击事件
   const changeSpec = (key: string, value: string, able: boolean) => {
     //不能被选中，直接返回
     if (!able) return;
@@ -167,6 +175,44 @@ const useChoiceSku = (skuList: skuListProps, specList: specProps) => {
     skuArray,
     selectSpec,
     changeSpec,
+  };
+};
+
+//商品sku弹出层显示和隐藏和确认选中的的规格
+const useSubmitSpec = (emit: (event: "SubmitSpec", ...args: unknown[]) => void) => {
+  const isShowSku = ref(false); //控制商品sku弹出层的显示和隐藏
+  const isShowSpec = ref(false); //判断商品sku单元格上标题显示内容
+  const purchaseNum = ref(1); //步进器由增加按钮、减少按钮和输入框组成，用于在一定范围内输入、调整数字。
+
+  //显示商品sku弹出层
+  const OnClickShowSku = () => {
+    isShowSku.value = true;
+  };
+
+  //确认选中的规格
+  const OnClickSubmit = (spec: selectI) => {
+    //判断是否选中了所有规格
+    isShowSpec.value = Object.keys(spec).every((val: string) => {
+      return spec[val] !== "";
+    });
+    if (isShowSpec.value) {
+      let selectSpec: selectSpecType = {
+        spec,
+        purchaseNum: purchaseNum.value,
+      };
+      //选中了规格，隐藏sku弹出层
+      isShowSku.value = false;
+      emit("SubmitSpec", selectSpec);
+    } else {
+      Toast("请选择完整规格");
+    }
+  };
+  return {
+    isShowSku,
+    isShowSpec,
+    OnClickShowSku,
+    purchaseNum,
+    OnClickSubmit,
   };
 };
 
@@ -201,14 +247,25 @@ export default defineComponent({
       type: String,
     },
   },
-  setup(props) {
-    const purchaseNum = ref(1); //步进器由增加按钮、减少按钮和输入框组成，用于在一定范围内输入、调整数字。
-    const { isShowSku, OnClickShowSku } = useShowSkuProp(); //商品sku弹出层显示和隐藏
+  emits: ["SubmitSpec"],
+  setup(props, { emit }) {
     const { specArray, skuArray, selectSpec, changeSpec } = useChoiceSku(
       props.skuList,
       props.specList
     );
-    return { isShowSku, OnClickShowSku, purchaseNum, specArray, skuArray, selectSpec, changeSpec };
+    const { isShowSku, isShowSpec, OnClickShowSku, purchaseNum, OnClickSubmit } =
+      useSubmitSpec(emit);
+    return {
+      isShowSku,
+      isShowSpec,
+      OnClickShowSku,
+      purchaseNum,
+      specArray,
+      skuArray,
+      selectSpec,
+      changeSpec,
+      OnClickSubmit,
+    };
   },
 });
 </script>

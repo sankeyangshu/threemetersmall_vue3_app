@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:31:02
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-30 09:28:01
+ * @LastEditTime: 2021-07-19 16:56:33
  */
 
 //导入axios
@@ -23,6 +23,7 @@ const instance = axios.create({
 
 //2. 配置请求头，全局的 axios 默认值
 instance.defaults.headers.post["Content-Type"] = "application/json;charset=UTF-8"; // 流程组件 content-type
+instance.defaults.headers.patch["Content-Type"] = "application/json;charset=UTF-8"; // 流程组件 content-type
 
 //3.添加一个请求拦截器
 instance.interceptors.request.use(

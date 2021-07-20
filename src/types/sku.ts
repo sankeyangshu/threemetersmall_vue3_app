@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-12 17:04:20
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-12 17:16:42
+ * @LastEditTime: 2021-07-19 14:04:21
  */
 
 /**
@@ -28,4 +28,9 @@ export interface specArrayType {
  */
 export interface selectI {
   [key: string]: string;
+}
+
+export interface selectSpecType {
+  spec: selectI;
+  purchaseNum: number;
 }

@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:45:01
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-12 16:35:48
+ * @LastEditTime: 2021-07-19 16:29:07
 -->
 <template>
   <div class="goodsDetails">
@@ -48,6 +48,7 @@
         :skuTitle="goodsName"
         :skuPrice="goodsPrice"
         :goodsId="id"
+        @SubmitSpec="SubmitSpec"
       ></sku>
     </div>
     <!-- 商品规格 结束 -->
@@ -64,8 +65,12 @@
     <!-- 购买商品 开始 -->
     <van-action-bar>
       <van-action-bar-icon icon="chat-o" text="客服" color="#ee0a24" />
-      <van-action-bar-icon icon="cart-o" text="购物车" />
-      <van-action-bar-button type="warning" text="加入购物车" />
+      <van-action-bar-icon icon="cart-o" text="购物车" :badge="badge" @click="OnClickToCart" />
+      <van-action-bar-button
+        type="warning"
+        text="加入购物车"
+        @click="OnClickAddToCart(id, goodsName, goodsImg, goodsPrice)"
+      />
       <van-action-bar-button type="danger" text="立即购买" />
     </van-action-bar>
     <!-- 购买商品 结束 -->
@@ -74,9 +79,12 @@
 
 <script lang="ts">
 import Sku from "@/components/Sku.vue";
-import { defineComponent, onMounted, reactive, toRefs } from "vue";
+import { Toast } from "vant";
+import { defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getGoodsDetailAPI } from "@/api/goods";
+import { getShoppingAPI, postAddShoppingAPI } from "@/api/shoppingcart";
+import { selectSpecType } from "@/types";
 
 //返回上一级
 const useReturnLevel = () => {
@@ -87,7 +95,7 @@ const useReturnLevel = () => {
   return onClickLeft;
 };
 
-//获取商品详情
+//获取商品详情和购物车数据
 const useSeeProductDetail = () => {
   const route = useRoute();
   const goodsid = route.query.id; //获取列表页面传递的商品id
@@ -104,6 +112,7 @@ const useSeeProductDetail = () => {
     goodsImg: "", //轮播图
     goodsDetail: "", //商品详情
   });
+  const badge = ref(0); //购物车右上角徽标的内容
 
   onMounted(async () => {
     //获取后端传递的商品详情数据
@@ -118,6 +127,13 @@ const useSeeProductDetail = () => {
       content.goodsDetail = res.data.goodsDetail;
       content.specList = res.data.specList;
       content.skuList = res.data.skuList;
+    });
+    //获取后端传递的购物车列表数据
+    await getShoppingAPI({
+      pageIndex: 0,
+      pageSize: 100,
+    }).then((res) => {
+      badge.value = res.data.count; //获取购物车中商品数量
     });
   });
 
@@ -144,6 +160,60 @@ const useSeeProductDetail = () => {
     goodsDetail,
     specList,
     skuList,
+    badge,
+  };
+};
+
+// 商品加入购物车和立即购买
+const useGoodsCartBuy = () => {
+  const router = useRouter();
+
+  //加入购物车请求参数
+  let shopParams = {
+    goodsId: 0, //商品id
+    goodsName: "", //商品名称
+    goodsImg: "", //商品头图
+    goodsNumber: 0, //商品数量
+    goodsPrice: 0, //商品价格
+    spec: "", //商品规格
+    isDelete: 0, //是否删除了该商品
+  };
+
+  //获取选中的sku
+  const SubmitSpec = (selectSpec: selectSpecType) => {
+    shopParams.goodsNumber = selectSpec.purchaseNum;
+    shopParams.spec = JSON.stringify(selectSpec.spec);
+  };
+
+  //加入购物车
+  const OnClickAddToCart = (
+    id: number,
+    goodsName: string,
+    goodsImg: string,
+    goodsPrice: number
+  ) => {
+    shopParams.goodsId = id;
+    shopParams.goodsName = goodsName;
+    shopParams.goodsImg = goodsImg;
+    shopParams.goodsPrice = Number(goodsPrice);
+    //判断用户是否选中规格
+    if (shopParams.goodsNumber === 0 || shopParams.spec === "") {
+      Toast("请先选择规格");
+    } else {
+      postAddShoppingAPI(shopParams).then(() => {
+        Toast("已经添加到购物车了哦！");
+      });
+    }
+  };
+
+  //查看购物车
+  const OnClickToCart = () => {
+    router.push({ name: "Flow" });
+  };
+  return {
+    SubmitSpec,
+    OnClickAddToCart,
+    OnClickToCart,
   };
 };
 
@@ -163,7 +233,9 @@ export default defineComponent({
       goodsDetail,
       specList,
       skuList,
+      badge,
     } = useSeeProductDetail();
+    const { SubmitSpec, OnClickAddToCart, OnClickToCart } = useGoodsCartBuy();
     return {
       onClickLeft,
       id,
@@ -176,6 +248,10 @@ export default defineComponent({
       goodsDetail,
       specList,
       skuList,
+      badge,
+      SubmitSpec,
+      OnClickAddToCart,
+      OnClickToCart,
     };
   },
 });

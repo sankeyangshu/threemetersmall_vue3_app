@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-07-01 17:28:25
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-02 10:17:28
+ * @LastEditTime: 2021-07-19 15:38:14
  */
 
 //导入http
@@ -30,6 +30,11 @@ export function getGoodsListAPI(params: goodsListParams) {
   return http.get("/api/goods/goodslist", params);
 }
 
+/**
+ * @description: 获取商品详情数据
+ * @param {goodsDetailParams} params 请求参数，商品id
+ * @return {*}
+ */
 export function getGoodsDetailAPI(params: goodsDetailParams) {
   return http.get("/api/goods/goodsdetail", params);
 }

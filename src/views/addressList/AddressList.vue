@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:44:04
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:44:26
+ * @LastEditTime: 2021-07-27 14:39:20
 -->
 
 <template>
@@ -46,7 +46,12 @@ const useReturnLevel = () => {
   };
   //新增地址
   const onAdd = () => {
-    router.push("AddressEdit");
+    router.push({
+      name: "AddressEdit",
+      query: {
+        isAddressEdit: "notEdit", //是否是新增地址,notEdit代表是新增地址，edit代表是修改地址
+      },
+    });
   };
   return { onClickLeft, onAdd };
 };
@@ -67,9 +72,15 @@ const useGetAddressList = () => {
 
 //编辑地址逻辑
 const useUpdateAddress = () => {
+  const router = useRouter();
   const onEdit = (item: addressList) => {
-    console.log("file: AddressList.vue ~ line 75 ~ item", item);
-    console.log("编辑地址");
+    router.push({
+      name: "AddressEdit",
+      query: {
+        addressId: item.id, //地址id
+        isAddressEdit: "edit", //是否是新增地址,notEdit代表是新增地址，edit代表是修改地址
+      },
+    });
   };
   return onEdit;
 };

@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:36:06
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:36:21
+ * @LastEditTime: 2021-07-27 14:46:38
  */
 
 /**
@@ -26,6 +26,21 @@ export interface loginParams {
  * 用户收货地址参数类型
  */
 export interface addressParams {
+  name: string;
+  tel: string;
+  province: string;
+  city: string;
+  county: string;
+  addressDetail: string;
+  areaCode: string;
+  isDefault: boolean;
+}
+
+/**
+ * 用户修改地址参数类型
+ */
+export interface updateAddressParams {
+  id: number;
   name: string;
   tel: string;
   province: string;

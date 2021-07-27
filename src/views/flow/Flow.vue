@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:40:03
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-20 13:59:50
+ * @LastEditTime: 2021-07-27 11:51:40
 -->
 <template>
   <div class="flow">
@@ -78,7 +78,7 @@
     <!-- 分割线 结束 -->
 
     <!-- 提交订单栏 开始 -->
-    <van-submit-bar :price="totalPrice" button-text="提交订单">
+    <van-submit-bar :price="totalPrice" button-text="提交订单" @submit="onSubmit">
       <van-checkbox v-model="allChecked" checked-color="#ee0a24"> 全选 </van-checkbox>
     </van-submit-bar>
     <!-- 提交订单栏 结束 -->
@@ -92,10 +92,11 @@
 <script lang="ts">
 import BottomTabs from "@/components/BottomTabs.vue";
 import GoodList from "@/components/GoodList.vue";
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
 import { getShoppingAPI, patchUpdateShopAPI, deleteShoppingAPI } from "@/api/shoppingcart";
 import { getGoodsListAPI } from "@/api/goods";
 import { useRouter } from "vue-router";
+import { Toast } from "vant";
 
 //购物车逻辑
 const useShoppingCart = () => {
@@ -199,6 +200,24 @@ const useShoppingCart = () => {
     console.log("checked");
   };
 
+  //提交订单
+  const onSubmit = () => {
+    let result = content.flowList.some((val: any) => {
+      return val.isChecked;
+    });
+    if (result) {
+      router.push({
+        name: "PlaceOrder",
+        query: {
+          list: JSON.stringify(content.flowList),
+          totalPrice: Number(totalPrice),
+        },
+      });
+    } else {
+      Toast("请选择要购买的商品");
+    }
+  };
+
   const { flowList } = toRefs(content);
   return {
     flowList,
@@ -209,6 +228,7 @@ const useShoppingCart = () => {
     OnClickViewDetail,
     OnClickDeleteCart,
     OnChangeAllCheck,
+    onSubmit,
   };
 };
 
@@ -245,6 +265,7 @@ export default defineComponent({
       OnClickViewDetail,
       OnClickDeleteCart,
       OnChangeAllCheck,
+      onSubmit,
     } = useShoppingCart(); //购物车逻辑
     const { goodsList } = useGoodsList(); //获取为你推荐商品列表
     return {
@@ -257,6 +278,7 @@ export default defineComponent({
       OnClickViewDetail,
       OnClickDeleteCart,
       OnChangeAllCheck,
+      onSubmit,
     };
   },
 });

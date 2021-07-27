@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:40:34
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:27:09
+ * @LastEditTime: 2021-07-27 09:41:49
 -->
 <template>
   <div class="mine">
@@ -30,7 +30,7 @@
           <div class="order__isLink">全部订单<van-icon name="arrow" /></div>
         </div>
         <van-grid class="grid__order">
-          <van-grid-item icon="description" text="全部订单" />
+          <van-grid-item icon="description" text="全部订单" to="Order" />
           <van-grid-item icon="balance-list-o" text="待付款" />
           <van-grid-item icon="logistics" text="待发货" />
           <van-grid-item icon="records" text="待收货" />
@@ -40,7 +40,7 @@
     </div>
     <!-- 收货地址、我的帮助 开始 -->
     <van-cell-group>
-      <van-cell title="收货地址" icon="location-o" is-link />
+      <van-cell title="收货地址" icon="location-o" is-link to="AddressList" />
       <van-cell title="我的帮助" icon="question-o" is-link />
       <van-cell title="关于我们" icon="warning-o" is-link />
       <van-cell title="退出账号" icon="setting-o" is-link />

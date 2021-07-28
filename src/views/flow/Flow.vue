@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 10:40:03
  * @LastEditors: 王振
- * @LastEditTime: 2021-07-27 11:51:40
+ * @LastEditTime: 2021-07-27 16:04:04
 -->
 <template>
   <div class="flow">
@@ -206,11 +206,15 @@ const useShoppingCart = () => {
       return val.isChecked;
     });
     if (result) {
+      //格式化数组，只获取数组中选中的数据
+      let list = JSON.parse(JSON.stringify(content.flowList)).filter((res: any) => {
+        return res.isChecked;
+      });
       router.push({
         name: "PlaceOrder",
         query: {
-          list: JSON.stringify(content.flowList),
-          totalPrice: Number(totalPrice),
+          list: JSON.stringify(list),
+          totalPrice: totalPrice.value / 100,
         },
       });
     } else {

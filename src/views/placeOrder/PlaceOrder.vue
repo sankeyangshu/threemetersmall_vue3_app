@@ -3,7 +3,7 @@
  * @Author: 王振
  * @Date: 2021-06-25 12:48:38
  * @LastEditors: 王振
- * @LastEditTime: 2021-06-25 12:48:51
+ * @LastEditTime: 2021-07-27 17:27:27
 -->
 <template>
   <div class="placeOrder">
@@ -19,10 +19,10 @@
         </div>
         <div class="myInfo">
           <div class="myInfo__detail">
-            <span>一号</span>
-            <span>12345678912</span>
+            <span>{{ address.name }}</span>
+            <span>{{ address.tel }}</span>
           </div>
-          <div class="myInfo__address">宿迁市洋河新区电商产业园105号</div>
+          <div class="myInfo__address">{{ address.address }}</div>
         </div>
         <div class="right__icon">
           <van-icon name="arrow" size="36" />
@@ -32,45 +32,149 @@
     <!-- 送货地址 结束 -->
 
     <!-- 商品 开始 -->
-    <van-card
-      num="2"
-      price="2.00"
-      desc="描述信息"
-      title="商品标题"
-      thumb="https://img.yzcdn.cn/vant/ipad.jpeg"
-    />
+    <div v-for="item in goodsList" :key="item.id">
+      <van-card
+        :num="item.goodsNumber"
+        :price="item.goodsPrice"
+        :title="item.goodsName"
+        :thumb="item.goodsImg"
+      >
+        <template #desc>
+          <div class="detail__sku">
+            规格：<span v-for="(its, index) in item.spec" :key="index">{{ its }}</span>
+          </div>
+        </template>
+      </van-card>
+    </div>
     <!-- 商品 结束 -->
 
     <!-- 配送方式 开始 -->
     <van-cell-group>
       <van-cell title="应付金额">
-        <div class="total__price">￥123.00</div>
+        <div class="total__price">￥{{ amountPayable }}</div>
       </van-cell>
-      <van-cell title="商品总价" value="￥123.00" />
-      <van-cell title="运费" value="￥0.00" />
+      <van-cell title="商品总价" :value="`￥${totalPrice}`" />
+      <van-cell title="运费" :value="`￥${freightPrice}`" />
       <van-cell title="发票信息" value="不需要发票" />
     </van-cell-group>
     <!-- 配送方式 结束 -->
 
     <!-- 订单金额 开始 -->
     <div class="sumbit">
-      <van-button type="primary" block color="#d81d1d">提交订单</van-button>
+      <van-button type="primary" block color="#d81d1d" @click="OnClickSubmit">提交订单</van-button>
     </div>
     <!-- 订单金额 结束 -->
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { useRouter } from "vue-router";
+import { defineComponent, onMounted, reactive, toRefs } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { getAddressListAPI } from "@/api/address";
+import { postAddOrderAPI } from "@/api/order";
+import { deleteShoppingAPI } from "@/api/shoppingcart";
+import { Toast } from "vant";
+
+//返回上一级
+const useReturnLevel = () => {
+  const router = useRouter();
+  //返回上一级
+  const onClickLeft = () => {
+    router.back();
+  };
+
+  return { onClickLeft };
+};
+
+//获取商品信息,默认地址，提交订单等功能
+const getOrderEffect = () => {
+  const router = useRouter();
+  const route = useRoute();
+  const content = reactive({
+    goodsList: [], //商品列表
+    amountPayable: 0, //应付金额
+    totalPrice: 0, //商品总价
+    freightPrice: 0, //运费
+    address: {}, //用户地址
+  });
+  let addressId = 1; //所选地址id
+
+  //获取默认地址
+  const getDefault = async () => {
+    const { data } = await getAddressListAPI();
+    //获取默认地址
+    for (let val of data) {
+      if (val.isDefault) {
+        content.address = val;
+        addressId = Number(val.id); //获取默认地址id
+      }
+    }
+  };
+
+  onMounted(() => {
+    //获取应付金额和商品总价
+    content.totalPrice = Number(route.query.totalPrice);
+    content.amountPayable = Number(route.query.totalPrice);
+    //获取商品列表
+    content.goodsList = JSON.parse(String(route.query.list));
+    //获取默认地址
+    getDefault();
+  });
+
+  //提交订单
+  const OnClickSubmit = async () => {
+    let params = {
+      addressId, //所选地址id
+      goodsId: String(route.query.list), //所选商品主体
+      amountPayable: content.amountPayable, //应付金额
+      totalPrice: content.totalPrice, //商品总价
+      freightPrice: content.freightPrice, //运费
+      payStatus: 0, //支付状态
+      orderStatus: 0, //订单状态
+      isInvoice: false, //是否需要发票
+    };
+    try {
+      //提交订单
+      await postAddOrderAPI(params);
+      //订单提交成功，删除购物车里的数据
+      let list = JSON.parse(String(route.query.list));
+      for (let val of list) {
+        await deleteShoppingAPI({ id: Number(val.id) });
+      }
+      Toast("订单提交成功");
+      router.back();
+    } catch (err) {
+      Toast(err.message);
+      return err; //抛出异常
+    }
+  };
+
+  const { goodsList, amountPayable, totalPrice, freightPrice, address } = toRefs(content);
+  return {
+    goodsList,
+    amountPayable,
+    totalPrice,
+    freightPrice,
+    address,
+    OnClickSubmit,
+  };
+};
+
 export default defineComponent({
   name: "PlaceOrder",
   setup() {
-    const router = useRouter();
-    const onClickLeft = () => {
-      router.back();
+    const { onClickLeft } = useReturnLevel(); //返回上一级
+    const { goodsList, amountPayable, totalPrice, freightPrice, address, OnClickSubmit } =
+      getOrderEffect();
+    return {
+      onClickLeft,
+      goodsList,
+      amountPayable,
+      totalPrice,
+      freightPrice,
+      address,
+      OnClickSubmit,
     };
-    return { onClickLeft };
   },
 });
 </script>
@@ -126,6 +230,17 @@ export default defineComponent({
       height: 120px;
       @include center;
     }
+  }
+}
+// 商品规格样式
+.detail__sku {
+  margin-top: 10px;
+  font-size: 28px;
+  font-weight: normal;
+  color: #999;
+  @include ellipsis;
+  span {
+    margin-right: 10px;
   }
 }
 .van-card {

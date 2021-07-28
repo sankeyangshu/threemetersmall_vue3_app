@@ -2,23 +2,65 @@
 
 #### 介绍
 
-使用 vue3 和 typescript 开发商城项目
+距离vue3正式版推出已经过去了好几个月了，此次vue3带来的最大的更新就是**Composition API**和**TypeScript**的支持，但是我在网上搜索vue3+ts的实战项目，发现大部分vue3的项目依旧还是使用js来进行开发的，对于学习vue3+ts的应用没有太大帮助，所以那不如就我来写这个项目，开源出来供大家学习。选择电商项目，是因为电商类型的项目是我工作以后的第一个项目类型，所以对于这类型的项目怀有一种特殊的情怀。
+
+**注1：此项目属于个人学习项目，仅供学习和技术研究使用，不建议商用。**
+
+**注2：如果对您有帮助，您可以点右上角 "Star" 支持一下 谢谢！**
 
 #### 软件架构
 
-软件架构说明
+vue3 + ts + vuex + vue-router + webpack + vant + axios + sass
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+#####  前序准备
 
-#### 使用说明
+你需要在本地安装 [node](http://nodejs.org/) ，node 需要 6.0 以上版本
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+```bash
+git clone https://gitee.com/sankeyangshu/threemetersmall_vue3_app.git
+
+cd threemetersmall_vue3_app
+
+npm install
+
+npm run serve
+```
+
+#### 后端接口以及目标
+
+前后端分离版本其他仓库：
+
+- [三米商城后端接口 threemetersmall_koa2_api](https://gitee.com/sankeyangshu/threemetersmall_koa2_api)    
+
+后续会继续开发vue2、mpvue、uniapp和react等版本，因为这个项目是个人的学习项目，所以我会把我所有会的技术都写一次这个项目。
+
+。。。敬请期待
+
+#### 项目截图
+
+##### 个人中心  
+
+![](docs/1.png)  
+
+##### 分类
+
+![](docs/2.png)    
+
+##### 商品详情  
+
+![](docs/3.png)  
+
+##### 商品规格选择  
+
+![](docs/4.png)  
+
+##### 我的订单  
+
+![](docs/5.png)  
+
+
 
 #### 参与贡献
 
@@ -27,11 +69,6 @@
 3.  提交代码
 4.  新建 Pull Request
 
-#### 特技
+#### 许可证
 
-1.  使用 Readme_XXX.md 来支持不同的语言，例如 Readme_en.md, Readme_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+[[MIT License](https://gitee.com/sankeyangshu/threemetersmall_vue3_app/blob/master/LICENSE)
